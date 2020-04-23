@@ -1,0 +1,417 @@
+---
+title: "SampleSizeAnalysisDiseaseBlades"
+author: "LRA"
+date: "4/22/2020"
+output: github_document
+fig_width: 10 
+fig_height: 12
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(patchwork)
+```
+
+## Sample size for disease surveys
+
+Can we reduce the number of blades collected for analysis of prevalence and severity?
+
+First look at paired t-tests of Prevalence, Severity, and Blade Area. Compare transect-level means at each site, for the full sample size (20 blades) and a subsample (15, 10, or 5).
+
+Note the n=5 blades are the epiphyte blades, so they are evenly distributed along the transects.
+
+```{r data, echo=FALSE}
+disease <- read.csv("disease_2019.csv")
+t_20 <- disease %>%
+  group_by(Region,SiteCode,TidalHeight,Transect)%>%
+  summarise(Prevalence=mean(Prevalence),BladeArea=mean(BladeArea),
+            Severity=mean(Severity),Count=length(Blade))
+disease_15 <- subset(disease,Blade<16)
+t_15 <- disease_15 %>%
+  group_by(Region,SiteCode,TidalHeight,Transect)%>%
+  summarise(Prevalence=mean(Prevalence),BladeArea=mean(BladeArea),
+            Severity=mean(Severity),Count=length(Blade))
+disease_10 <- subset(disease,Blade<11)
+t_10 <- disease_10 %>%
+  group_by(Region,SiteCode,TidalHeight,Transect)%>%
+  summarise(Prevalence=mean(Prevalence),BladeArea=mean(BladeArea),
+            Severity=mean(Severity),Count=length(Blade))
+disease_5s <- subset(disease,Blade>15)
+t_5s <- disease_5s %>%
+  group_by(Region,SiteCode,TidalHeight,Transect)%>%
+  summarise(Prevalence=mean(Prevalence),BladeArea=mean(BladeArea),
+            Severity=mean(Severity),Count=length(Blade))
+
+t_20 <- unite(t_20,col="TransectId",c("Region","SiteCode","TidalHeight","Transect"),sep="_",remove = FALSE)
+t_15 <- unite(t_15,col="TransectId",c("Region","SiteCode","TidalHeight","Transect"),sep="_",remove = FALSE)
+t_10 <- unite(t_10,col="TransectId",c("Region","SiteCode","TidalHeight","Transect"),sep="_",remove = FALSE)
+t_5s <- unite(t_5s,col="TransectId",c("Region","SiteCode","TidalHeight","Transect"),sep="_",remove = FALSE)
+t_20$TransectId <- as.factor(t_20$TransectId)
+t_15$TransectId <- as.factor(t_15$TransectId)
+t_10$TransectId <- as.factor(t_10$TransectId)
+t_5s$TransectId <- as.factor(t_5s$TransectId)
+
+transects <- levels(t_20$TransectId)
+
+t_20 <- unite(t_20,col="MeadowId",c("Region","SiteCode"),sep="_",remove = FALSE)
+t_15 <- unite(t_15,col="MeadowId",c("Region","SiteCode"),sep="_",remove = FALSE)
+t_10 <- unite(t_10,col="MeadowId",c("Region","SiteCode"),sep="_",remove = FALSE)
+t_5s <- unite(t_5s,col="MeadowId",c("Region","SiteCode"),sep="_",remove = FALSE)
+t_20$MeadowId <- as.factor(t_20$MeadowId)
+t_15$MeadowId <- as.factor(t_15$MeadowId)
+t_10$MeadowId <- as.factor(t_10$MeadowId)
+t_5s$MeadowId <- as.factor(t_5s$MeadowId)
+
+meadows <- levels(t_20$MeadowId)
+
+for(i in seq_along(meadows)){
+  temp1 <- subset(t_20,MeadowId==meadows[i])
+  temp2 <- subset(t_15,MeadowId==meadows[i])
+  # if (is.na(mean(temp4$Ave_3reps)==TRUE)) next
+  # else
+  test <- t.test(temp1$Prevalence,temp2$Prevalence,paired=TRUE)
+  if(i == 1){sig_table_15 <- data.frame(MeadowId=meadows)}else
+  sig_table_15[i,"P-value"] <- test$p.value
+}
+
+for(i in seq_along(meadows)){
+  temp1 <- subset(t_20,MeadowId==meadows[i])
+  temp2 <- subset(t_15,MeadowId==meadows[i])
+  testP <- t.test(temp1$Prevalence,temp2$Prevalence,paired=TRUE)
+  testS <- t.test(temp1$Severity,temp2$Severity,paired=TRUE)
+  testBA <- t.test(temp1$BladeArea,temp2$BladeArea,paired=TRUE)
+  if(i == 1){sig_table_15 <- data.frame(MeadowId=meadows)}else
+    sig_table_15[i,"Prevalence"] <- testP$p.value
+  sig_table_15[i,"Severity"] <- testS$p.value
+  sig_table_15[i,"Blade Area"] <- testBA$p.value
+}
+
+for(i in seq_along(meadows)){
+  temp1 <- subset(t_20,MeadowId==meadows[i])
+  temp2 <- subset(t_10,MeadowId==meadows[i])
+  testP <- t.test(temp1$Prevalence,temp2$Prevalence,paired=TRUE)
+  testS <- t.test(temp1$Severity,temp2$Severity,paired=TRUE)
+  testBA <- t.test(temp1$BladeArea,temp2$BladeArea,paired=TRUE)
+  if(i == 1){sig_table_10 <- data.frame(MeadowId=meadows)}else
+    sig_table_10[i,"Prevalence"] <- testP$p.value
+  sig_table_10[i,"Severity"] <- testS$p.value
+  sig_table_10[i,"Blade Area"] <- testBA$p.value
+}
+
+for(i in seq_along(meadows)){
+  temp1 <- subset(t_20,MeadowId==meadows[i])
+  temp2 <- subset(t_5s,MeadowId==meadows[i])
+  testP <- t.test(temp1$Prevalence,temp2$Prevalence,paired=TRUE)
+  testS <- t.test(temp1$Severity,temp2$Severity,paired=TRUE)
+  testBA <- t.test(temp1$BladeArea,temp2$BladeArea,paired=TRUE)
+  if(i == 1){sig_table_5s <- data.frame(MeadowId=meadows)}else
+    sig_table_5s[i,"Prevalence"] <- testP$p.value
+  sig_table_5s[i,"Severity"] <- testS$p.value
+  sig_table_5s[i,"Blade Area"] <- testBA$p.value
+}
+```
+
+### P-values of paired t-tests for n=15
+```{r fifteen,echo=FALSE}
+print(sig_table_15)
+```
+
+### P-values of paired t-tests for n=10
+```{r ten,echo=FALSE}
+print(sig_table_10)
+```
+
+### P-values of paired t-tests for n=5
+```{r five,echo=FALSE}
+print(sig_table_5s)
+```
+
+Few significant tests, so statistically we are fairly safe to reduce sample size.
+
+Now compare correlation between subsamples and full sample
+
+```{r plots, echo=FALSE}
+t_20$Replicates <- "Twenty"
+t_15$Replicates <- "Fifteen"
+t_10$Replicates <- "Ten"
+t_5s$Replicates <- "Five"
+
+full <- rbind(t_20,t_15,t_10,t_5s)
+
+wide_P <- full[,c("TransectId","Replicates","Prevalence")]
+wide_P <- spread(wide_P,key=Replicates,Prevalence)
+wide_P <- separate(wide_P,col="TransectId",into=c("Region","SiteCode","TidalHeight","Transect"),sep="_",remove = FALSE)
+
+wide_S <- full[,c("TransectId","Replicates","Severity")]
+wide_S <- spread(wide_S,key=Replicates,Severity)
+wide_S <- separate(wide_S,col="TransectId",into=c("Region","SiteCode","TidalHeight","Transect"),sep="_",remove = FALSE)
+
+wide_BA <- full[,c("TransectId","Replicates","BladeArea")]
+wide_BA <- spread(wide_BA,key=Replicates,BladeArea)
+wide_BA <- separate(wide_BA,col="TransectId",into=c("Region","SiteCode","TidalHeight","Transect"),sep="_",remove = FALSE)
+
+P15 <- ggplot(wide_P,aes(x=Twenty))+
+  geom_point(aes(y=Fifteen,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  theme_bw()+
+  labs(title="15 blades")+
+  xlab("")+
+  ylab("Prevalence")+
+  theme(legend.position = "")
+
+P10 <- ggplot(wide_P,aes(x=Twenty))+
+  geom_point(aes(y=Ten,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  theme_bw()+
+  labs(title="10 blades")+
+  xlab("")+
+  ylab("Prevalence")
+
+P5 <- ggplot(wide_P,aes(x=Twenty))+
+  geom_point(aes(y=Five,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+#  stat_smooth(method="lm",geom="smooth",aes(y=Five))+
+  theme_bw()+
+  labs(title="5 blades")+
+  xlab("Prevalence of n=20 blades")+
+  ylab("Prevalence")+
+  theme(legend.position = "")
+
+BA15 <- ggplot(wide_BA,aes(x=Twenty))+
+  geom_point(aes(y=Fifteen,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("")+
+  labs(title="15 blades")+
+  ylab("Blade Area")+
+  theme(legend.position = "")
+
+BA10 <- ggplot(wide_BA,aes(x=Twenty))+
+  geom_point(aes(y=Ten,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  labs(title="10 blades")+
+  xlab("")+
+  ylab("Blade Area")
+
+BA5 <- ggplot(wide_BA,aes(x=Twenty))+
+  geom_point(aes(y=Five,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("Blade Area of n=20 blades")+
+  ylab("Blade Area")+
+  labs(title="5 blades")+
+  theme(legend.position = "")
+
+
+S15 <- ggplot(wide_S,aes(x=Twenty))+
+  geom_point(aes(y=Fifteen,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("")+
+  ylab("Severity")+
+  theme(legend.position = "")+
+  labs(title="15 blades")
+
+S10 <- ggplot(wide_S,aes(x=Twenty))+
+  geom_point(aes(y=Ten,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("")+
+  ylab("Severity")+
+  labs(title="10 blades")
+
+S5 <- ggplot(wide_S,aes(x=Twenty))+
+  geom_point(aes(y=Five,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("Severity of n=20 blades")+
+  ylab("Severity")+
+  labs(title="5 blades")+
+  theme(legend.position = "")
+```
+
+### Transect level plots
+
+Prevalence
+
+```{r P,echo=FALSE}
+P15/P10/P5
+```
+
+Severity
+
+```{r S,echo=FALSE}
+S15/S10/S5
+```
+
+Blade Area
+
+```{r BA,echo=FALSE}
+BA15/BA10/BA5
+```
+
+```{r meadow,echo=FALSE}
+m_20 <- disease %>%
+  group_by(Region,SiteCode)%>%
+  summarise(Prevalence=mean(Prevalence),BladeArea=mean(BladeArea),
+            Severity=mean(Severity),Count=length(Blade))
+
+m_15 <- disease_15 %>%
+  group_by(Region,SiteCode)%>%
+  summarise(Prevalence=mean(Prevalence),BladeArea=mean(BladeArea),
+            Severity=mean(Severity),Count=length(Blade))
+
+m_10 <- disease_10 %>%
+  group_by(Region,SiteCode)%>%
+  summarise(Prevalence=mean(Prevalence),BladeArea=mean(BladeArea),
+            Severity=mean(Severity),Count=length(Blade))
+
+m_5s <- disease_5s %>%
+  group_by(Region,SiteCode)%>%
+  summarise(Prevalence=mean(Prevalence),BladeArea=mean(BladeArea),
+            Severity=mean(Severity),Count=length(Blade))
+
+m_20 <- unite(m_20,col="MeadowId",c("Region","SiteCode"),sep="_",remove = FALSE)
+m_15 <- unite(m_15,col="MeadowId",c("Region","SiteCode"),sep="_",remove = FALSE)
+m_10 <- unite(m_10,col="MeadowId",c("Region","SiteCode"),sep="_",remove = FALSE)
+m_5s <- unite(m_5s,col="MeadowId",c("Region","SiteCode"),sep="_",remove = FALSE)
+m_20$MeadowId <- as.factor(m_20$MeadowId)
+m_15$MeadowId <- as.factor(m_15$MeadowId)
+m_10$MeadowId <- as.factor(m_10$MeadowId)
+m_5s$MeadowId <- as.factor(m_5s$MeadowId)
+m_20$Replicates <- "Twenty"
+m_15$Replicates <- "Fifteen"
+m_10$Replicates <- "Ten"
+m_5s$Replicates <- "Five"
+
+full_m <- rbind(m_20,m_15,m_10,m_5s)
+
+wide_m_P <- full_m[,c("MeadowId","Replicates","Prevalence")]
+wide_m_P <- spread(wide_m_P,key=Replicates,Prevalence)
+wide_m_P <- separate(wide_m_P,col="MeadowId",into=c("Region","SiteCode"),sep="_",remove = FALSE)
+
+wide_m_S <- full_m[,c("MeadowId","Replicates","Severity")]
+wide_m_S <- spread(wide_m_S,key=Replicates,Severity)
+wide_m_S <- separate(wide_m_S,col="MeadowId",into=c("Region","SiteCode"),sep="_",remove = FALSE)
+
+wide_m_BA <- full_m[,c("MeadowId","Replicates","BladeArea")]
+wide_m_BA <- spread(wide_m_BA,key=Replicates,BladeArea)
+wide_m_BA <- separate(wide_m_BA,col="MeadowId",into=c("Region","SiteCode"),sep="_",remove = FALSE)
+
+mP15 <- ggplot(wide_m_P,aes(x=Twenty))+
+  geom_point(aes(y=Fifteen,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  theme_bw()+
+  labs(title="15 blades")+
+  xlab("")+
+  ylab("Prevalence")+
+  theme(legend.position = "")
+
+mP10 <- ggplot(wide_m_P,aes(x=Twenty))+
+  geom_point(aes(y=Ten,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  theme_bw()+
+  labs(title="10 blades")+
+  xlab("")+
+  ylab("Prevalence")
+
+mP5 <- ggplot(wide_m_P,aes(x=Twenty))+
+  geom_point(aes(y=Five,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #  stat_smooth(method="lm",geom="smooth",aes(y=Five))+
+  theme_bw()+
+  labs(title="5 blades")+
+  xlab("Prevalence of n=20 blades")+
+  ylab("Prevalence")+
+  theme(legend.position = "")
+
+mBA15 <- ggplot(wide_m_BA,aes(x=Twenty))+
+  geom_point(aes(y=Fifteen,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("")+
+  labs(title="15 blades")+
+  ylab("Blade Area")+
+  theme(legend.position = "")
+
+mBA10 <- ggplot(wide_m_BA,aes(x=Twenty))+
+  geom_point(aes(y=Ten,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  labs(title="10 blades")+
+  xlab("")+
+  ylab("Blade Area")
+
+mBA5 <- ggplot(wide_m_BA,aes(x=Twenty))+
+  geom_point(aes(y=Five,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("Blade Area of n=20 blades")+
+  ylab("Blade Area")+
+  labs(title="5 blades")+
+  theme(legend.position = "")
+
+mS15 <- ggplot(wide_m_S,aes(x=Twenty))+
+  geom_point(aes(y=Fifteen,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("")+
+  ylab("Severity")+
+  theme(legend.position = "")+
+  labs(title="15 blades")
+
+mS10 <- ggplot(wide_m_S,aes(x=Twenty))+
+  geom_point(aes(y=Ten,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("")+
+  ylab("Severity")+
+  labs(title="10 blades")
+
+mS5 <- ggplot(wide_m_S,aes(x=Twenty))+
+  geom_point(aes(y=Five,color=Region))+
+  geom_abline(slope=1,intercept = 0,linetype="dashed")+
+  #stat_smooth(method="lm",geom="smooth",aes(y=Fifteen))+
+  theme_bw()+
+  xlab("Severity of n=20 blades")+
+  ylab("Severity")+
+  labs(title="5 blades")+
+  theme(legend.position = "")
+```
+
+### Meadow level plots
+
+Prevalence
+
+```{r mP,echo=FALSE}
+mP15/mP10/mP5
+```
+
+Severity
+
+```{r mS,echo=FALSE}
+mS15/mS10/mS5
+```
+
+Blade Area
+
+```{r mBA,echo=FALSE}
+mBA15/mBA10/mBA5
+```
+
+Overall, we could probably go down to 15 blades per transect and not lose much information. There will be more spread at transect level, but the meadow level will look the same.
+
+Blade Area looks fine even with just 5 blades, which is nice to know since our shoot morphology uses only 5 blades/shoots per transect.
