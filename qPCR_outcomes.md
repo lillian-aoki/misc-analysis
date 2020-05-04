@@ -39,7 +39,7 @@ mg.
     primers or to the qPCR method (e.g. using SYBR Green?) that might
     lead to more success.
 
-### Moving forward -2019
+### Moving forward - 2019
 
 For purposes of the NSF analysis, we want to be able to say we have Lz
 in all regions and ideally in all meadows where we find lesions. We can
@@ -50,23 +50,32 @@ ratio of negatives to positives).
 One strategy is that we can run more samples. We collected 12 tissue
 samples per meadow (site). For the first round of qPCR anaylsis, I
 extracted and analyzed a subset of samples (no more than 4 per meadow).
-So, theoretically, we have more tissue samples to run at each site.
-However, I tried to select the most promising lesion tissue samples,
-based on the scanned images. So the remaining tissues samples may be
-slightly worse candidates for qPCR than those already run. We’d also
-have to think about the expense of running many more samples in pursuit
-of a handful of positives.
+So, theoretically, we have more tissue samples to run at each site (up
+to 8 more per site). However, I tried to select the most promising
+lesion tissue samples, based on the scanned images. So the remaining
+tissues samples may be slightly worse candidates for qPCR than those
+already run. We’d also have to think about the expense of running many
+more samples in pursuit of a handful of positives.
 
 Regarding (2) above, we planned to run tests in Colleen’s lab to confirm
 the presence of amplifiable DNA in the extracts. Basically, we want to
-make sure that the ethanol storage isn’t compromising DNA extraction. I
-believe the plan was to run universal eukaryotic primers to confirm
-there is any DNA in the samples (eelgrass or Lz). This would eliminate
-sample collection and extraction as sources of error.
+make sure that the ethanol storage isn’t compromising DNA extraction.
+The plan was to run universal eukaryotic primers to confirm there is any
+DNA in the samples (eelgrass or Lz). This would eliminate sample
+collection and extraction as sources of error.
 
 Assuming we do have DNA in the extracts, we could do further methods
-development (e.g. address (3) above). This would need to happen in
-Colleen’s lab, with Colleen or Tori assisting Lillian :)
+development (e.g. address (3) above). This would likely need to happen
+in Colleen’s lab, with Colleen or Tori assisting Lillian :)
+
+Note, I am currently planning to extract and run additional 2019 samples
+from the remaining regions (BC, SD, more BB) in June 2020. I expect to
+have low success rates with these samples as well. Potentially, we could
+think about adjusting the extraction methods - possibly using a
+different kit? When we last talked it didn’t sound like this would be
+very fruitful, but we could try it. Not sure if there are any other
+changes we could make, with the equipment at FHL, to improve success
+rates.
 
 ### Moving forward - 2020
 
@@ -83,12 +92,10 @@ few weeks. A few possibilities:
 
 One issue with choosing a new method is that we don’t actually know
 what/if there’s an issue with the 2019 method. We likely won’t have any
-additional information to make that decision. I’m planning to extract
-and run additional 2019 samples from the remaining regions (BC, SD, more
-BB) in June 2020. I expect to have low success rates with these samples
-as well. Possibly sometime this summer we will be able to do the tests
-to confirm that the ethanol preservation is okay, but we can’t do those
-tests under current conditions.
+additional information to make that decision. Possibly sometime this
+summer we will be able to do the tests to confirm that the ethanol
+preservation is okay, but we can’t do those tests under current
+conditions.
 
 Given this situation, my suggestion is that we ask partners to collect
 lesion samples at a subset of sites using the same methods as last year.
