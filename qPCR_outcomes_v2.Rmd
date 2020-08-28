@@ -147,13 +147,14 @@ count_T <- tests %>%
   group_by(YearMonth,Detection)%>%
   summarise(total=length(Run))
 
-plot_T <- ggplot(tests,aes(x=Detection))+geom_histogram(stat = "count",color="black")+
+plot_T <- ggplot(tests,aes(x=Detection,fill=Detection))+geom_histogram(stat = "count")+
   facet_wrap(~YearMonth)+
   theme_bw()+
   xlab("qPCR detection results")+
   ylab("Number of tissue samples")+
   labs(title="qPCR results from Fourth of July")+
   scale_y_continuous(limits = c(0,16))+
+  scale_color_brewer(palette='Dark2')+
   geom_text(data=count_T,aes(x=Detection,y=16,label=total))
 plot_T
 
@@ -163,7 +164,7 @@ cells_T <- ggplot(data=tests_P,aes(x=YearMonth,y=Cells.mg,color=YearMonth))+geom
   stat_summary(fun.y=mean,geom="point",shape=8,size=2,position=position_dodge(width=0.75),
                show.legend = FALSE)+
   theme_bw()+
-  scale_color_brewer(palette='Dark2')+
+  #scale_color_brewer(palette='Dark2')+
   xlab("Sampling Date")+
   ylab("Lz cells / mg wet tissue")+
   labs(title = "Lz cell counts from positive lesions at Fourth of July",
