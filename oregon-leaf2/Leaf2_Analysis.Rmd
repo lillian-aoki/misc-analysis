@@ -1,0 +1,77 @@
+---
+title: "leaf2_leaf3"
+author: "LRA"
+date: "10/6/2020"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(readxl)
+```
+
+### Leaf 2 vs Leaf 3
+
+Here, I am comparing wasting disease prevalence on leaf 2 and leaf 3 of plants collected at three of the Oregon sites in 2019. 
+
+In Oregon, many eelgrass shoots have only 4 leaves, meaning leaf 3 is an outer leaf, in contrast to morphology in other regions where most shoots have 5 or more leaves. Leaves in Oregon are also very long-lived/persistent, so leaf 3 is likely older and has had more exposure to disease, relative to leaf 3 in other regions.
+
+In 2019, we collected leaf 2 for analysis at all Oregon sites. This dataset is a small set of additional shoots, collected at the same tidal heights but not along the transects. All leaves were analyzed for WD prevalence. Comparing the prevalence of leaf 2 and 3, leaf 3 does have WD slightly more often than leaf 2; 23 of 147 leaf 3's were diseased compared to 17 out of 150 leaf 2's. However, there is no statistical difference in prevalence between leaf 2 and leaf 3, either across all sites or within each site (assessed using GLMs, see below). 
+
+#### Prevalence by leaf rank
+
+```{r data}
+or <- read_xlsx(path = "Data_WD_OR_2019_Comparison.xlsx",sheet="data final",trim_ws = TRUE)
+or$Estuary <- as.factor(or$Estuary)
+or$Site <- as.factor(or$Site)
+leaf <- tibble("Site"=or$Site,"Depth"=or$Depth,"Shoot"=or$`Shoot #`,"Leaf"=or$`Leaf #`,WD=or$`Wasting Disease?`)
+leaf$WD <- gsub("1","0",leaf$WD)
+leaf$WD <- gsub("2","1",leaf$WD)
+
+leaf$Leaf <- as.factor(leaf$Leaf)
+leaf_summ <- leaf %>%
+  group_by(Site,Depth,Leaf)%>%
+  summarise(n=length(WD),diseased=length(WD[WD==1]),healthy=length(WD[WD==0]),
+            prevalence=diseased/n)
+leaf_summ2 <- leaf %>%
+  group_by(Site,Leaf)%>%
+  summarise(n=length(WD),diseased=length(WD[WD==1]),healthy=length(WD[WD==0]),
+            prevalence=diseased/n)
+print(leaf_summ2)
+
+ggplot(leaf,aes(x=Leaf,fill=WD))+geom_bar(position = position_dodge(preserve = "single"))+
+  facet_wrap(~Site)+
+  scale_y_continuous(expand = c(0,0),limits=c(0,62))+
+  theme_bw()+
+  scale_fill_manual(values=c("darkgreen","grey50"),labels=c("Healthy","Diseased"))+
+  xlab("Leaf rank")+
+  ylab("Number of leaves")+
+  theme(legend.title = element_blank())
+```
+
+The summary table shows that prevalence for leaf 2 was 5-20% at the three sites and prevalence for leaf 3 was 5-28%. These values are well within the range of prevalence detected from the NSF survey data on Leaf 2 in July 2019: 0-45% at the transect level, and 11-34% at the site level. 
+
+Additionally, at these three sites, only 30%, 50%, and 0% of shoots had 5 leaves. Again, this shows a contrast to predominant eelgrass morphology elsewhere.
+
+#### Statistical test
+
+I modeled prevalence (0 or 1) as a function of Leaf Rank (2 or 3) and Site, using logistic regression (GLM with binomial link function). Leaf Rank was not significant in determining disease prevalence; the interaction between Leaf Rank and Site was also not significant. 
+
+```{r model, echo=FALSE}
+leaf23 <- subset(leaf,Leaf=="2" | Leaf=="3")
+leaf23$WD <- as.integer(leaf23$WD)
+m1 <- glm(WD~Leaf,data=leaf23, family=binomial)
+summary(m1)
+m2 <- glm(WD~Leaf*Site,data=leaf23, family=binomial)
+summary(m2)
+drop1(m2)
+```
+
+#### Conclusions
+
+1. There is no statistical or meaningful difference in disease prevalence between Leaf 2 and Leaf 3 at these Oregon sites in 2019.
+
+2. Therefore, Leaf 2 measurements do not underestimate disease prevalence compared to Leaf 3 in other regions.
+
+The main limitation of this analysis is that we only have three of the five Oregon sites included. Samples from the other two sites were collected but remain to be analyzed. But using these data, we can justify the difference in method between OR and the other sites. 
