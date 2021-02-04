@@ -21,7 +21,11 @@ In 2019, we collected leaf 2 for analysis at all Oregon sites. This dataset is a
 
 #### Prevalence by leaf rank
 
+<<<<<<< HEAD
 ```{r data,fig.width=4.75,fig.height=3.4}
+=======
+```{r data}
+>>>>>>> d4966c0a8ade4598075e62061c824f422507d6bb
 or <- read_xlsx(path = "oregon-leaf2/Data_WD_OR_2019_Comparison.xlsx",sheet="data final",trim_ws = TRUE)
 or$Estuary <- as.factor(or$Estuary)
 or$Site <- as.factor(or$Site)
