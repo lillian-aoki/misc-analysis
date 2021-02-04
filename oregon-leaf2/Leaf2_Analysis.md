@@ -26,30 +26,36 @@ sites or within each site (assessed using GLMs, see below).
 #### Prevalence by leaf rank
 
     ## New names:
-    ## * `total leaf area` -> `total leaf area..23`
-    ## * `total leaf area` -> `total leaf area..24`
-    ## * `` -> `..25`
+    ## * `total leaf area` -> `total leaf area...23`
+    ## * `total leaf area` -> `total leaf area...24`
+    ## * `` -> ...25
 
-    ## # A tibble: 16 x 6
-    ## # Groups:   Site [?]
-    ##    Site  Leaf      n diseased healthy prevalence
-    ##    <fct> <fct> <int>    <int>   <int>      <dbl>
-    ##  1 IF    1        60        0      60     0     
-    ##  2 IF    2        60        3      57     0.05  
-    ##  3 IF    3        58        3      55     0.0517
-    ##  4 IF    4        42        1      41     0.0238
-    ##  5 IF    5        18        0      18     0     
-    ##  6 IF    6         3        1       2     0.333 
-    ##  7 SBN   1        60        4      56     0.0667
-    ##  8 SBN   2        60        9      51     0.15  
-    ##  9 SBN   3        60       12      48     0.2   
-    ## 10 SBN   4        57       10      47     0.175 
-    ## 11 SBN   5        30        4      26     0.133 
-    ## 12 SBN   6         1        0       1     0     
-    ## 13 SBS   1        30        0      30     0     
-    ## 14 SBS   2        30        5      25     0.167 
-    ## 15 SBS   3        29        8      21     0.276 
-    ## 16 SBS   4        19        3      16     0.158
+    ## Warning: Unknown or uninitialised column: `Meadow`.
+
+    ## `summarise()` has grouped output by 'Site', 'Meadow', 'Depth'. You can override using the `.groups` argument.
+
+    ## `summarise()` has grouped output by 'Site', 'Meadow'. You can override using the `.groups` argument.
+
+    ## # A tibble: 16 x 7
+    ## # Groups:   Site, Meadow [3]
+    ##    Site  Meadow Leaf      n diseased healthy prevalence
+    ##    <fct> <chr>  <fct> <int>    <int>   <int>      <dbl>
+    ##  1 IF    OR_D   1        60        0      60     0     
+    ##  2 IF    OR_D   2        60        3      57     0.05  
+    ##  3 IF    OR_D   3        58        3      55     0.0517
+    ##  4 IF    OR_D   4        42        1      41     0.0238
+    ##  5 IF    OR_D   5        18        0      18     0     
+    ##  6 IF    OR_D   6         3        1       2     0.333 
+    ##  7 SBN   OR_E   1        60        4      56     0.0667
+    ##  8 SBN   OR_E   2        60        9      51     0.15  
+    ##  9 SBN   OR_E   3        60       12      48     0.2   
+    ## 10 SBN   OR_E   4        57       10      47     0.175 
+    ## 11 SBN   OR_E   5        30        4      26     0.133 
+    ## 12 SBN   OR_E   6         1        0       1     0     
+    ## 13 SBS   OR_C   1        30        0      30     0     
+    ## 14 SBS   OR_C   2        30        5      25     0.167 
+    ## 15 SBS   OR_C   3        29        8      21     0.276 
+    ## 16 SBS   OR_C   4        19        3      16     0.158
 
 ![](Leaf2_Analysis_files/figure-gfm/data-1.png)<!-- -->
 
