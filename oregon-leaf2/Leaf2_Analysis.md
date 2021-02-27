@@ -57,7 +57,7 @@ sites or within each site (assessed using GLMs, see below).
     ## 15 SBS   OR_C   3        29        8      21     0.276 
     ## 16 SBS   OR_C   4        19        3      16     0.158
 
-![](Leaf2_Analysis_files/figure-gfm/data-1.png)<!-- -->
+![](Leaf2_Analysis_files/figure-gfm/data-1.png)<!-- -->![](Leaf2_Analysis_files/figure-gfm/data-2.png)<!-- -->
 
 The summary table shows that prevalence for leaf 2 was 5-20% at the
 three sites and prevalence for leaf 3 was 5-28%. These values are well
