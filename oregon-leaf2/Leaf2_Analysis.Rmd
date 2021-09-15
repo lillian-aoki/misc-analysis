@@ -59,7 +59,7 @@ ggplot(leaf[leaf$Leaf==2|leaf$Leaf==3,],aes(x=Leaf,fill=WD))+geom_bar(position =
   scale_y_continuous(expand = c(0,0),limits=c(0,62))+
   theme_bw(base_size = 11)+
   scale_fill_manual(values=c("darkgreen","grey50"),labels=c("Healthy","Diseased"))+
-  xlab("Leaf rank")+
+  xlab("Blade rank")+
   ylab("Count of plants")+
   theme(legend.title = element_blank(),
         panel.grid = element_blank(),
