@@ -1,0 +1,142 @@
+---
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(snakecase)
+library(kableExtra)
+region_order <- c("AK","BC","WA","OR","BB","SD")
+```
+
+## Latitudinal wasting disease: eDNA and qPCR results
+
+This document provides a summary of qPCR and eDNA results from the latitudinal wasting disease surveys.  
+
+These results may be of interest to the EEID project team, as these samples can be used for sequencing or to inform new sample plans. 
+
+```{r data, echo=FALSE, warning=FALSE}
+qpcr <- readxl::read_xlsx("~/Box/projects/NSF WD/qPCR/2021/2021_NSF_qPCR_sampleID.xlsx",sheet = 1)
+names(qpcr) <- to_upper_camel_case(names(qpcr))
+qpcr$QPcrResult <- ordered(qpcr$QPcrResult,levels=c("Positive","Low","Negative"))         
+qpcr$Region <- ordered(qpcr$Region,levels=c("AK","BC","WA","OR","BB","SD"))
+qpcr$Meadow <- paste(qpcr$Region,qpcr$SiteCode,sep="_")
+
+
+cells <- readxl::read_xlsx("~/Box/projects/NSF WD/qPCR/plate files/qPCR_summary_2021.xlsx", sheet = 1)
+cells$CellsMg <- as.numeric(cells$CellsMg)
+cells$Region <- ordered(cells$Region, levels=region_order)
+```
+## qPCR 
+
+### Background 
+
+For the latitudinal wasting disease surveys, the goal of the qPCR analysis has been to confirm the presence of the pathogen (Labyrinthula zosterae) across the study sites. In 2019, we attempted to do this with lesion tissue samples preserved by team partners at each site. However, many of those samples were negative for Lz, likely due to poor sample selection (e.g. selecting tissue that is not a lesion or that is too degraded to return a positive result for Lz).  
+
+In 2020, we (FHL team) received fresh tissue samples from Bodega Bay and San Diego and did the lesion selection at FHL. This process had a better outcome for Bodega Bay (~3/5 samples were positive for Lz, which is on par with sample selection outcomes in the San Juan Islands). For San Diego, the samples we received were highly suspect and we did not have any positives.  
+
+In 2021, we (FHL team) received fresh tissue samples from all the partner sites and did the lesion selection at FHL, except Oregon where LRA did the sample selection with the Oregon team. Samples were preserved in ethanol and extracted about 3 months later (late October). Note, we preserved and extracted samples from 3 sites per region in most cases (we only asked for tissue from three sites per region). Alsaka and British Columbia sent us samples from additional sites, which we also preserved. We preserved more samples than were extracted (between 10 and 18 per site). We also attempted to preserve some of the 'Crescent' morphology lesions, which occured at a subset of sites. 
+
+Results of the extraction are shown below.
+
+### Results
+
+Figure 1 shows the number of lesion tissue samples that registered as positive, negative, and low for Laby DNA. The 'low' samples indicate the sample was positive but at a calculated value below 1 cell per mg dried tissue. These are likely positives, but perhaps less biologically meaningful. Each region had at least two sites with positive Lz DNA in lesion tissue.  
+
+```{r qPCR-plot, echo=FALSE, warning=FALSE, fig.cap="Fig 1. Positive and negative qPCR lesion samples"}
+qpcr %>% 
+  filter(SelectForFirstExtraction=='Y') %>%
+  ggplot(aes(x=SiteCode))+
+  geom_histogram(aes(fill=QPcrResult),stat = "count",color="black")+
+  facet_wrap(~Region)+
+  ylab("Count of Samples")+
+  scale_fill_discrete()+
+  labs(title = "Fig 1. Lz DNA detection in lesion tissue samples",
+       subtitle = "Summer 2021")+
+  theme_bw(base_size = 14)+
+  theme(legend.title = element_blank())
+```
+
+We also extracted and ran paired green tissue with each of these samples (from the base of the infected leaf). Green tissue samples were all negative.  
+
+Figure 2 shows the Lz cells per mg of dry tissue across sites. Most cell counts were below 500 cells/mg, with the exception of the positive sample from Bodega Bay-D (a site in Bodega Bay proper), which had cell counts of almost 2000 cells/mg. 
+
+```{r cells-plot, echo=FALSE, warning=FALSE, fig.cap="Fig 2. Cell counts for positive lesion tissue samples"}
+cells %>%
+  filter(Tissue=="Lesion") %>%
+  ggplot(aes(x=Region, y=CellsMg, color=Site))+
+  geom_point(position=position_dodge(width=0.5), size=4)+
+  ylab("Lz cells per mg dry tissue")+
+  labs(title = "Fig 2. Cell counts in lesion tissue samples positive for Lz DNA",
+       subtitle = "Summer 2021")+
+  theme_bw(base_size = 14)
+```
+
+The following three tables show the number of samples that were extracted per site (Table 1) and the number of samples that are still preserved, including conventional lesions (Table 2) and crescent lesions (Table 3). These samples are not needed for the latitudinal wasting disease surveys but can be repurposed for sequencing to look at Lz variants across space.  
+
+```{r lesion-table, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+qpcr$LesionTypeConventionalCrescentCombo <- gsub(".*rescent*.", "Crescent", qpcr$LesionTypeConventionalCrescentCombo)
+qpcr$LesionTypeConventionalCrescentCombo <- gsub(".*combo*.", "Crescent", qpcr$LesionTypeConventionalCrescentCombo)
+qpcr_t1 <- qpcr %>%
+  filter(SelectForFirstExtraction=="Y") %>%
+  group_by(Region, SiteCode) %>%
+  summarise(NumberSamples=length(SampleId))
+qpcr_t2 <- qpcr %>%
+  filter(SelectForFirstExtraction=="N", LesionTypeConventionalCrescentCombo=="Conventional") %>%
+  group_by(Region, SiteCode) %>%
+  summarise(NumberSamples=length(SampleId))
+qpcr_t3 <- qpcr %>%
+  filter(SelectForFirstExtraction=="N", LesionTypeConventionalCrescentCombo=="Crescent") %>%
+  group_by(Region, SiteCode) %>%
+  summarise(NumberSamples=length(SampleId))
+kable(qpcr_t1, caption = "Table 1. Number of lesion samples run for qPCR in 2021")
+kable(qpcr_t2, cap= "Table 2. Number of preserved conventional lesion samples")
+kable(qpcr_t3, cap= "Table 3. Number of preserved crescent lesion samples")
+
+```
+
+Note, the BC sites with SiteCode of 'NA' are sites that are not included in the wasting disease surveys, but they sent us samples (e.g. Hakai Dock). There were a few crescents among these samples that might be worth testing.  
+
+Across all sites, there are remaining `r sum(qpcr_t2$NumberSamples)` conventional lesion tissue samples and `r sum(qpcr_t3$NumberSamples)` crescent lesion tissue samples. 
+
+## eDNA
+
+```{r edna-data, warning=FALSE, message=FALSE, echo=FALSE}
+info <- read.csv("eDNA/2019_DNA_extracts.csv")
+cells <- read.csv("eDNA/2019_water_eDNA_summary.csv")
+cells$SampleID <- gsub('w',"-W",cells$Sample)
+cells_info <- left_join(cells,info,by=c("SampleID"="sampleid"))
+cells_info$CellsPerMl <- cells_info$TotalCellsInSample/cells_info$TotalWaterVolumeFiltered
+cells_info$CellsPerL <- cells_info$CellsPerMl*1000
+cells_info$Region <- ordered(cells_info$Region,levels=region_order)
+```
+
+### Background
+
+In 2019, we collected water samples across all the latitudinal wasting disease survey sites for microbiome analysis. We then used the Lz qPCR assay to detect environmental pathogen loads in these water samples. Results are shown in Figure 3 below. 
+
+In 2021, we collected water samples at the survey sites in the San Juan Islands only for additional eDNA analysis. These samples were filtered and the filters were frozen and stored in the -80 at FHL. Table 4 shows the number of eDNA filters preserved and awaiting extraction and processing. 
+
+We used comparable methods in 2021 and 2019 (500 mL samples, filtered in the lab using the same type of filtration unit). However, sampling in 2019 was uniformly on a falling tide, whereas sampling in 2021 was in some cases after the surveys on the rising tide.  
+
+### Results
+
+Figure 3 shows the environmental cell counts from samples at all sites. Note that Alaska doesn't appear beause no samples from Alaska came up positive for Lz. Also note there was no sampling control for these samples.   
+
+```{r edna-plot, echo=FALSE, message= FALSE, warning=FALSE}
+ggplot(cells_info,aes(x=Region,y=CellsPerL,color=SiteCode))+geom_jitter(width=0.15, size=4)+
+  ylab("Laby cells per L")+
+  labs(title="Fig 3. Lz eDNA analysis of seawater samples",
+       subtitle = "Collected July 2019")+
+  theme_bw(base_size = 14)
+```
+
+Table 4 shows the samples collected in 2021 that need to be processed. The grand total of all samples and controls is 67.
+
+```{r edna-table, echo=FALSE, results='asis'}
+edna_21 <- tibble(Region="WA", SiteCode=c("A","B", "D", "E"), 
+                  SiteName=c("Fourth of July", "False Bay", "North Cove","Indian Cove"),
+                  NumberSamples=c(18, 18, 9, 18), NumberControl=c(1,1,1,1))
+kable(edna_21, caption="Table 4. Number of water samples collected for eDNA in 2021")
+```
